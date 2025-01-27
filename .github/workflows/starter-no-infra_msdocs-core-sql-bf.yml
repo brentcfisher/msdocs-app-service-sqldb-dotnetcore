@@ -26,14 +26,20 @@ jobs:
       - name: Build with dotnet
         run: dotnet build --configuration Release
 
+      - name: Install dotnet-ef
+        run: dotnet tool install --global dotnet-ef --version 8.*
+
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+
+      - name: Create migrations bundle
+        run: dotnet ef migrations bundle -o ${{env.DOTNET_ROOT}}/myapp/migrationsbundle --runtime linux-x64
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          path: ${{github.workspace}}/myapp
 
   deploy:
     runs-on: ubuntu-latest
@@ -65,4 +71,3 @@ jobs:
           app-name: 'msdocs-core-sql-bf'
           slot-name: 'Production'
           package: .
-          
